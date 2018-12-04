@@ -25,3 +25,5 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'saturday']], functi
     //Route::post('/books', 'BooksController@store')->name('books.store');
     Route::get('/books/{book}/destroy', 'BooksController@destroy')->name('books.destroyshort');
 });
+
+Route::post('/book', 'BooksController@storeJson');

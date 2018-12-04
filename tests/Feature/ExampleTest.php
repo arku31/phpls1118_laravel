@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -14,8 +16,22 @@ class ExampleTest extends TestCase
      */
     public function testBasicTest()
     {
-        $response = $this->get('/');
+        Auth::login(User::first());
+        $response = $this->post('/book', [
+            'name' => 'User1',
+            'user_id' => 1
+        ]);
+        $response->assertJsonFragment([
+            'name' => 'User1',
+            'user_id' => 1,
+        ]);
 
-        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'name',
+            'user_id',
+            'id',
+        ]);
+
+        $response->assertStatus(201);
     }
 }

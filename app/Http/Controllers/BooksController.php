@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\BookCreatedEvent;
+use App\Mail\BooksCreatedMail;
 use App\Models\Book;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -11,6 +13,7 @@ class BooksController extends Controller
     public function index()
     {
         $data['books'] = Book::with('user')->get();
+        event(new BookCreatedEvent());
         return view('admin.books.index', $data);
     }
 
@@ -29,7 +32,10 @@ class BooksController extends Controller
         $name = $request->get('name');
         $user_id = $request->user_id;
 
-        Book::create(['name' => $name, 'user_id' => $user_id]);
+        $book = Book::create(['name' => $name, 'user_id' => $user_id]);
+
+        $user = \Auth::user();
+        \Mail::to($user)->send(new BooksCreatedMail($book));
         return redirect(route('books.index'));
     }
 
@@ -59,5 +65,14 @@ class BooksController extends Controller
     {
         $book->delete();
         return redirect(route('books.index'));
+    }
+
+    public function storeJson(Request $request)
+    {
+        $book = new Book();
+        $book->name = $request->get('name');
+        $book->user_id = $request->get('user_id');
+        $book->save();
+        return $book;
     }
 }
